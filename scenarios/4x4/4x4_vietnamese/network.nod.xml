@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<nodes>
+    <node id="n_0_0" x="0" y="0" type="traffic_light"/>
+    <node id="n_0_1" x="200" y="0" type="traffic_light"/>
+    <node id="n_0_2" x="400" y="0" type="traffic_light"/>
+    <node id="n_0_3" x="600" y="0" type="traffic_light"/>
+    <node id="n_1_0" x="0" y="200" type="traffic_light"/>
+    <node id="n_1_1" x="200" y="200" type="traffic_light"/>
+    <node id="n_1_2" x="400" y="200" type="traffic_light"/>
+    <node id="n_1_3" x="600" y="200" type="traffic_light"/>
+    <node id="n_2_0" x="0" y="400" type="traffic_light"/>
+    <node id="n_2_1" x="200" y="400" type="traffic_light"/>
+    <node id="n_2_2" x="400" y="400" type="traffic_light"/>
+    <node id="n_2_3" x="600" y="400" type="traffic_light"/>
+    <node id="n_3_0" x="0" y="600" type="traffic_light"/>
+    <node id="n_3_1" x="200" y="600" type="traffic_light"/>
+    <node id="n_3_2" x="400" y="600" type="traffic_light"/>
+    <node id="n_3_3" x="600" y="600" type="traffic_light"/>
+    <node id="n_north_0" x="0" y="800" type="priority"/>
+    <node id="n_north_1" x="200" y="800" type="priority"/>
+    <node id="n_north_2" x="400" y="800" type="priority"/>
+    <node id="n_north_3" x="600" y="800" type="priority"/>
+    <node id="n_south_0" x="0" y="-200" type="priority"/>
+    <node id="n_south_1" x="200" y="-200" type="priority"/>
+    <node id="n_south_2" x="400" y="-200" type="priority"/>
+    <node id="n_south_3" x="600" y="-200" type="priority"/>
+    <node id="n_east_0" x="800" y="0" type="priority"/>
+    <node id="n_east_1" x="800" y="200" type="priority"/>
+    <node id="n_east_2" x="800" y="400" type="priority"/>
+    <node id="n_east_3" x="800" y="600" type="priority"/>
+    <node id="n_west_0" x="-200" y="0" type="priority"/>
+    <node id="n_west_1" x="-200" y="200" type="priority"/>
+    <node id="n_west_2" x="-200" y="400" type="priority"/>
+    <node id="n_west_3" x="-200" y="600" type="priority"/>
+</nodes>

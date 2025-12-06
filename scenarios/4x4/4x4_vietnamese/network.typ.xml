@@ -1,0 +1,4 @@
+<?xml version="1.0" ?>
+<types>
+    <type id="urban_road" priority="9" numLanes="2" speed="13.89" allow="motorcycle passenger bus truck" width="3.2"/>
+</types>

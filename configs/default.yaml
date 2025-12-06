@@ -1,0 +1,58 @@
+# MADDPG Traffic Light Optimization Configuration
+# With improved training stability fixes
+
+# Environment Settings
+environment:
+  scenario: "2x2"  # "2x2" or "3x3"
+  decision_interval: 10  # seconds between agent decisions
+  episode_length: 3600  # 1 hour simulation (in seconds)
+  step_length: 1.0  # SUMO simulation step length
+  min_phase_duration: 10  # minimum seconds before phase can switch
+  # Note: switch_penalty is now scaled internally (0.05) for density-normalized rewards
+
+# MADDPG Hyperparameters
+maddpg:
+  lr: 0.001  # single learning rate for both actor and critic
+  gamma: 0.99  # discount factor
+  tau: 0.001  # soft update parameter
+  batch_size: 64
+  buffer_size: 100000  # larger buffer for better sample diversity
+  hidden_sizes: [64, 64]
+
+# Prioritized Experience Replay
+per:
+  use_per: true  # enable prioritized experience replay
+  alpha: 0.6  # prioritization exponent (0 = uniform, 1 = full prioritization)
+  beta_start: 0.4  # initial importance sampling weight
+  beta_frames: 150000  # frames to anneal beta to 1.0
+
+# Exploration (linear episode-based decay)
+exploration:
+  eps_start: 1.0  # start with full exploration
+  eps_end: 0.05  # maintain 5% exploration at end
+  eps_decay_episodes: 400  # linear decay over 400 episodes
+
+# Training Settings
+training:
+  n_episodes: 500
+  checkpoint_interval: 10  # episodes between checkpoints
+  log_interval: 1  # episodes between logging
+  render: false  # whether to show SUMO GUI
+
+# Scenario-specific settings
+scenarios:
+  2x2:
+    n_agents: 4
+    scenario_path: "scenarios/2x2/2x2_vietnamese"
+  3x3:
+    n_agents: 9
+    scenario_path: "scenarios/3x3/3x3_vietnamese"
+
+# Training flow files for generalization
+training_flows:
+  - "flows_training_balanced.rou.xml"
+  - "flows_training_light.rou.xml"
+  - "flows_training_heavy.rou.xml"
+  - "flows_training_ns_dominant.rou.xml"
+  - "flows_training_ew_dominant.rou.xml"
+  - "flows_training_time_varying.rou.xml"

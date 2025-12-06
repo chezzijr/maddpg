@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<edges>
+    <edge id="e_w_to_0_0" from="n_west_0" to="n_0_0" type="urban_road" spreadType="center"/>
+    <edge id="e_0_0_to_w" from="n_0_0" to="n_west_0" type="urban_road" spreadType="center"/>
+    <edge id="e_0_0_to_e" from="n_0_0" to="n_east_0" type="urban_road" spreadType="center"/>
+    <edge id="e_e_to_0_0" from="n_east_0" to="n_0_0" type="urban_road" spreadType="center"/>
+    <edge id="e_s_to_0_0" from="n_south_0" to="n_0_0" type="urban_road" spreadType="center"/>
+    <edge id="e_0_0_to_s" from="n_0_0" to="n_south_0" type="urban_road" spreadType="center"/>
+    <edge id="e_0_0_to_n" from="n_0_0" to="n_north_0" type="urban_road" spreadType="center"/>
+    <edge id="e_n_to_0_0" from="n_north_0" to="n_0_0" type="urban_road" spreadType="center"/>
+</edges>

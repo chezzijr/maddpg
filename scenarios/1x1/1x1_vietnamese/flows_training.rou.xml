@@ -1,0 +1,20 @@
+<?xml version="1.0" ?>
+<routes>
+    <include href="vehicle_types.add.xml"/>
+    <flow id="flow_0" type="motorcycle" begin="0" end="3600" from="e_w_to_0_0" to="e_0_0_to_e" vehsPerHour="350" departLane="best" departSpeed="max" departPos="base"/>
+    <flow id="flow_1" type="car" begin="0" end="3600" from="e_w_to_0_0" to="e_0_0_to_e" vehsPerHour="100" departLane="best" departSpeed="max" departPos="base"/>
+    <flow id="flow_2" type="bus" begin="0" end="3600" from="e_w_to_0_0" to="e_0_0_to_e" vehsPerHour="25" departLane="best" departSpeed="max" departPos="base"/>
+    <flow id="flow_3" type="truck" begin="0" end="3600" from="e_w_to_0_0" to="e_0_0_to_e" vehsPerHour="25" departLane="best" departSpeed="max" departPos="base"/>
+    <flow id="flow_4" type="motorcycle" begin="0" end="3600" from="e_e_to_0_0" to="e_0_0_to_w" vehsPerHour="350" departLane="best" departSpeed="max" departPos="base"/>
+    <flow id="flow_5" type="car" begin="0" end="3600" from="e_e_to_0_0" to="e_0_0_to_w" vehsPerHour="100" departLane="best" departSpeed="max" departPos="base"/>
+    <flow id="flow_6" type="bus" begin="0" end="3600" from="e_e_to_0_0" to="e_0_0_to_w" vehsPerHour="25" departLane="best" departSpeed="max" departPos="base"/>
+    <flow id="flow_7" type="truck" begin="0" end="3600" from="e_e_to_0_0" to="e_0_0_to_w" vehsPerHour="25" departLane="best" departSpeed="max" departPos="base"/>
+    <flow id="flow_8" type="motorcycle" begin="0" end="3600" from="e_s_to_0_0" to="e_0_0_to_n" vehsPerHour="350" departLane="best" departSpeed="max" departPos="base"/>
+    <flow id="flow_9" type="car" begin="0" end="3600" from="e_s_to_0_0" to="e_0_0_to_n" vehsPerHour="100" departLane="best" departSpeed="max" departPos="base"/>
+    <flow id="flow_10" type="bus" begin="0" end="3600" from="e_s_to_0_0" to="e_0_0_to_n" vehsPerHour="25" departLane="best" departSpeed="max" departPos="base"/>
+    <flow id="flow_11" type="truck" begin="0" end="3600" from="e_s_to_0_0" to="e_0_0_to_n" vehsPerHour="25" departLane="best" departSpeed="max" departPos="base"/>
+    <flow id="flow_12" type="motorcycle" begin="0" end="3600" from="e_n_to_0_0" to="e_0_0_to_s" vehsPerHour="350" departLane="best" departSpeed="max" departPos="base"/>
+    <flow id="flow_13" type="car" begin="0" end="3600" from="e_n_to_0_0" to="e_0_0_to_s" vehsPerHour="100" departLane="best" departSpeed="max" departPos="base"/>
+    <flow id="flow_14" type="bus" begin="0" end="3600" from="e_n_to_0_0" to="e_0_0_to_s" vehsPerHour="25" departLane="best" departSpeed="max" departPos="base"/>
+    <flow id="flow_15" type="truck" begin="0" end="3600" from="e_n_to_0_0" to="e_0_0_to_s" vehsPerHour="25" departLane="best" departSpeed="max" departPos="base"/>
+</routes>
