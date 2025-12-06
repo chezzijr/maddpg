@@ -12,7 +12,7 @@ import os
 import sys
 import random
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 import numpy as np
 import traci
@@ -95,6 +95,10 @@ class TrafficEnv:
         self.phase_timers: List[int] = []  # Time since last switch per agent
         self.switches_this_step: List[bool] = []  # Track switches for penalty
 
+        # Lane mappings for pressure-based reward (populated in reset)
+        self._incoming_lanes_per_tl: Dict[str, List[str]] = {}
+        self._outgoing_lanes_per_tl: Dict[str, List[str]] = {}
+
     def _get_sumo_cmd(self, flow_file: str) -> list:
         """Build SUMO command with the specified flow file."""
         route_file = self.scenario_path / flow_file
@@ -107,6 +111,30 @@ class TrafficEnv:
             "-W", "true",
             "--time-to-teleport", "300",
         ]
+
+    def _build_lane_mappings(self):
+        """
+        Build incoming/outgoing lane mappings for pressure-based reward.
+
+        Uses traci.trafficlight.getControlledLinks() which returns:
+        [((incoming_lane, outgoing_lane, internal_lane),), ...]
+
+        Cached once per episode to avoid repeated TraCI calls.
+        """
+        for tl_id in self.traffic_light_ids:
+            controlled_links = traci.trafficlight.getControlledLinks(tl_id)
+
+            incoming_lanes = set()
+            outgoing_lanes = set()
+
+            for link_group in controlled_links:
+                if link_group:  # link_group can be empty tuple
+                    in_lane, out_lane, _ = link_group[0]
+                    incoming_lanes.add(in_lane)
+                    outgoing_lanes.add(out_lane)
+
+            self._incoming_lanes_per_tl[tl_id] = list(incoming_lanes)
+            self._outgoing_lanes_per_tl[tl_id] = list(outgoing_lanes)
 
     def reset(self) -> np.ndarray:
         """
@@ -136,6 +164,9 @@ class TrafficEnv:
         # Get traffic light IDs
         self.traffic_light_ids = list(traci.trafficlight.getIDList())
         self.n_agents = len(self.traffic_light_ids)
+
+        # Build lane mappings for pressure-based reward
+        self._build_lane_mappings()
 
         # Initialize phase timers (start with enough time to allow immediate switch)
         self.phase_timers = [self.min_phase_duration] * self.n_agents
@@ -244,36 +275,57 @@ class TrafficEnv:
 
     def _get_rewards(self) -> np.ndarray:
         """
-        Calculate density-normalized rewards for all agents.
+        Calculate pressure-based rewards (directional PressLight formulation).
 
-        Reward = -(halting_count / max(vehicle_count, MIN_VEHICLES)) - switch_penalty
+        Pressure = incoming_halting - outgoing_halting
+        Reward = -pressure / normalization_factor
 
-        This bounds rewards to approximately [-1.05, 0] regardless of traffic density,
-        providing stable gradients across light and heavy traffic scenarios.
+        This naturally optimizes both waiting time AND throughput:
+        - Positive pressure (congestion building) = penalized
+        - Negative pressure (vehicles clearing through) = rewarded
+
+        Range: approximately [-1.05, 1.0]
 
         Returns:
             Array of rewards for each agent
         """
-        MIN_VEHICLES = 5  # Prevent division instability at low traffic
-        SWITCH_PENALTY_SCALED = 0.05  # Scaled for [-1, 0] reward range
+        MAX_QUEUE = 30  # Normalization factor (max expected queue per direction)
+        SWITCH_PENALTY = 0.05
 
         rewards = []
 
         for i, tl_id in enumerate(self.traffic_light_ids):
-            halting = 0
-            total_vehicles = 0
+            incoming_lanes = self._incoming_lanes_per_tl[tl_id]
+            outgoing_lanes = self._outgoing_lanes_per_tl[tl_id]
 
-            for lane in traci.trafficlight.getControlledLanes(tl_id):
-                halting += traci.lane.getLastStepHaltingNumber(lane)
-                total_vehicles += traci.lane.getLastStepVehicleNumber(lane)
+            # Sum halting vehicles on incoming and outgoing lanes
+            incoming_halting = sum(
+                traci.lane.getLastStepHaltingNumber(lane)
+                for lane in incoming_lanes
+            )
+            outgoing_halting = sum(
+                traci.lane.getLastStepHaltingNumber(lane)
+                for lane in outgoing_lanes
+            )
 
-            # Density-normalized reward: proportion of vehicles halting
-            effective_vehicles = max(total_vehicles, MIN_VEHICLES)
-            reward = -halting / effective_vehicles  # Range: [-1, 0]
+            # Pressure: positive = congestion building, negative = clearing
+            pressure = incoming_halting - outgoing_halting
 
-            # Add scaled switch penalty
+            # Normalize by number of lanes and max queue
+            n_lanes = max(len(incoming_lanes), 1)
+            normalized_pressure = pressure / (n_lanes * MAX_QUEUE)
+
+            # Reward: penalize positive pressure, reward negative pressure
+            # Positive pressure (incoming > outgoing) = congestion building = bad
+            # Negative pressure (outgoing > incoming) = vehicles clearing = good
+            reward = -normalized_pressure
+
+            # Clamp to [-1, 1] range (can get positive rewards for clearing)
+            reward = max(-1.0, min(1.0, reward))
+
+            # Add switch penalty
             if self.switches_this_step[i]:
-                reward -= SWITCH_PENALTY_SCALED
+                reward -= SWITCH_PENALTY
 
             rewards.append(reward)
 
