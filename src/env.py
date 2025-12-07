@@ -275,59 +275,37 @@ class TrafficEnv:
 
     def _get_rewards(self) -> np.ndarray:
         """
-        Calculate pressure-based rewards (directional PressLight formulation).
+        Calculate pressure-based rewards (SUMO-RL / PressLight formulation).
 
-        Pressure = incoming_halting - outgoing_halting
-        Reward = -pressure / normalization_factor
+        Pressure = out_vehicles - in_vehicles (from SUMO-RL)
 
-        This naturally optimizes both waiting time AND throughput:
-        - Positive pressure (congestion building) = penalized
-        - Negative pressure (vehicles clearing through) = rewarded
+        - Positive pressure = more vehicles leaving than approaching = good
+        - Negative pressure = more vehicles approaching than leaving = bad
 
-        Range: approximately [-1.05, 1.0]
+        Reference: https://github.com/LucasAlegre/sumo-rl
 
         Returns:
             Array of rewards for each agent
         """
-        MAX_QUEUE = 30  # Normalization factor (max expected queue per direction)
-        SWITCH_PENALTY = 0.05
-
         rewards = []
 
         for i, tl_id in enumerate(self.traffic_light_ids):
             incoming_lanes = self._incoming_lanes_per_tl[tl_id]
             outgoing_lanes = self._outgoing_lanes_per_tl[tl_id]
 
-            # Sum halting vehicles on incoming and outgoing lanes
-            incoming_halting = sum(
-                traci.lane.getLastStepHaltingNumber(lane)
-                for lane in incoming_lanes
-            )
-            outgoing_halting = sum(
-                traci.lane.getLastStepHaltingNumber(lane)
+            # SUMO-RL pressure: out_vehicles - in_vehicles
+            out_vehicles = sum(
+                traci.lane.getLastStepVehicleNumber(lane)
                 for lane in outgoing_lanes
             )
+            in_vehicles = sum(
+                traci.lane.getLastStepVehicleNumber(lane)
+                for lane in incoming_lanes
+            )
 
-            # Pressure: positive = congestion building, negative = clearing
-            pressure = incoming_halting - outgoing_halting
-
-            # Normalize by number of lanes and max queue
-            n_lanes = max(len(incoming_lanes), 1)
-            normalized_pressure = pressure / (n_lanes * MAX_QUEUE)
-
-            # Reward: penalize positive pressure, reward negative pressure
-            # Positive pressure (incoming > outgoing) = congestion building = bad
-            # Negative pressure (outgoing > incoming) = vehicles clearing = good
-            reward = -normalized_pressure
-
-            # Clamp to [-1, 1] range (can get positive rewards for clearing)
-            reward = max(-1.0, min(1.0, reward))
-
-            # Add switch penalty
-            if self.switches_this_step[i]:
-                reward -= SWITCH_PENALTY
-
-            rewards.append(reward)
+            # Pressure reward (no normalization, matches SUMO-RL)
+            pressure = out_vehicles - in_vehicles
+            rewards.append(pressure)
 
         return np.array(rewards, dtype=np.float32)
 
